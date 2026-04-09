@@ -1,7 +1,7 @@
 {
     "name": "reinfyteam/discordwebhookapi",
     "description": "A PocketMine-MP Virion to easily send messages via Discord Webhooks",
-    "type": "project",
+    "type": "library",
     "require": {
         "php": ">=8.2",
         "pocketmine/pocketmine-mp": "^5.42.1"
