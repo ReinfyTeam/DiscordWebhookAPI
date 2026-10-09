@@ -34,13 +34,17 @@ namespace CortexPE\DiscordWebhookAPI;
  * - Discord Button Interact -> Plugin Action if needed.
  * - Button Colors for not discord button link.
  */
-class Component extends \JsonSerializer {
+class Component implements \JsonSerializable {
     
     /** @var array **/
     protected $data = [];
     
     public function asArray(): array{
 		// Why doesn't PHP have a `__toArray()` magic method??? This would've been better.
+		return $this->data;
+	}
+
+	public function jsonSerialize(): mixed{
 		return $this->data;
 	}
     
