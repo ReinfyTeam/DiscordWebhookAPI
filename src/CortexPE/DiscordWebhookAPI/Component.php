@@ -36,8 +36,8 @@ namespace CortexPE\DiscordWebhookAPI;
  */
 class Component implements \JsonSerializable
 {
-    /** @var array{type?: int, components?: array{type?: int, label?: string, url?: string}} */
-    protected $data = [];
+    /** @var array{type?: 1, components?: list<array{type: 2, style: 5, label: string, url: string}>} */
+    protected array $data = [];
 
     /** @return array<string, mixed> */
     public function asArray(): array
@@ -65,8 +65,11 @@ class Component implements \JsonSerializable
             $this->data["components"] = [];
         }
 
-        $this->data["components"]["type"] = 5;
-        $this->data["components"]["label"] = $text;
-        $this->data["components"]["url"] = $link;
+        $this->data["components"][] = [
+            "type" => 2,
+            "style" => 5,
+            "label" => $text,
+            "url" => $link,
+        ];
     }
 }
