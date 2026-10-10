@@ -36,10 +36,11 @@ namespace CortexPE\DiscordWebhookAPI;
  */
 class Component implements \JsonSerializable {
     
-    /** @var array **/
+	/** @var array{type?: int, components?: array{type?: int, label?: string, url?: string}} */
     protected $data = [];
     
-    public function asArray(): array{
+	/** @return array<string, mixed> */
+	public function asArray(): array{
 		// Why doesn't PHP have a `__toArray()` magic method??? This would've been better.
 		return $this->data;
 	}
@@ -53,7 +54,7 @@ class Component implements \JsonSerializable {
      * @param string $text
      * @param string $link
      */
-    public function addLinkButton(string $text, string $link){
+    public function addLinkButton(string $text, string $link): void{
         if(!isset($this->data["type"])){
             $this->data["type"] = 1; // container for other components
         }

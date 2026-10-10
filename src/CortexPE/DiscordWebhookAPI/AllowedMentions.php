@@ -35,10 +35,10 @@ class AllowedMentions implements \JsonSerializable {
 	/** @var bool */
 	private $parseUsers = true, $parseRoles = true, $mentionEveryone = true, $suppressAll = false;
 
-	/** @var array */
+	/** @var list<string> */
 	private $roles = [];
 
-	/** @var array */
+	/** @var list<string> */
 	private $users = [];
 
 	/**
@@ -87,7 +87,8 @@ class AllowedMentions implements \JsonSerializable {
 		$this->suppressAll = true;
 	}
 
-	public function jsonSerialize(): mixed {
+	/** @return array<string, mixed> */
+	public function jsonSerialize(): array {
 		if ($this->suppressAll) {
 			return [
 				"parse" => []
@@ -113,8 +114,9 @@ class AllowedMentions implements \JsonSerializable {
 
 		return $data;
 	}
-    
-    public function asArray(): array{
+
+	/** @return array<string, mixed> */
+	public function asArray(): array{
 		// Why doesn't PHP have a `__toArray()` magic method??? This would've been better.
 		return $this->jsonSerialize();
 	}

@@ -30,15 +30,16 @@ namespace CortexPE\DiscordWebhookAPI;
 
 
 class Embed {
-	/** @var array */
+	/** @var array{author?: array{name?: string, url?: string, icon_url?: string}, fields?: list<array{name: string, value: string, inline: bool}>, thumbnail?: array<string, string>, image?: array<string, string>, footer?: array{text?: string, icon_url?: string}, title?: string, description?: string, color?: int, timestamp?: string} */
 	protected $data = [];
 
+	/** @return array<string, mixed> */
 	public function asArray(): array{
 		// Why doesn't PHP have a `__toArray()` magic method??? This would've been better.
 		return $this->data;
 	}
 
-	public function setAuthor(string $name, string $url = null, string $iconURL = null):void{
+	public function setAuthor(string $name, ?string $url = null, ?string $iconURL = null):void{
 		if(!isset($this->data["author"])){
 			$this->data["author"] = [];
 		}
@@ -88,7 +89,7 @@ class Embed {
 		$this->data["image"]["url"] = $url;
 	}
 
-	public function setFooter(string $text, string $iconURL = null):void{
+	public function setFooter(string $text, ?string $iconURL = null):void{
 		if(!isset($this->data["footer"])){
 			$this->data["footer"] = [];
 		}

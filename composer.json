@@ -1,6 +1,7 @@
 {
     "name": "reinfyteam/discordwebhookapi",
     "description": "A PocketMine-MP Virion to easily send messages via Discord Webhooks",
+    "license": "LGPL-3.0-or-later",
     "type": "library",
     "require": {
         "php": ">=8.2",
@@ -23,7 +24,7 @@
     "scripts": {
         "format": "php-cs-fixer fix --config=.php-cs-fixer.php --allow-risky=yes",
         "format:check": "php-cs-fixer fix --config=.php-cs-fixer.php --allow-risky=yes --dry-run --diff",
-        "analyze": "vendor/bin/phpstan"
+        "analyze": "vendor/bin/phpstan analyse src --level=9"
     },
     "minimum-stability": "stable",
     "prefer-stable": true,

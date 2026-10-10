@@ -34,17 +34,19 @@ use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
 
 class DiscordWebhookSendTask extends AsyncTask {
-    protected $webhook;
-    protected $message;
+    protected string $webhook;
+    protected string $message;
 
     public function __construct(Webhook $webhook, Message $message){
-        $this->webhook = serialize($webhook); 
-        $this->message = serialize($message); 
+        $this->webhook = serialize($webhook);
+        $this->message = serialize($message);
     }
 
     public function onRun(): void {
-        $webhook = unserialize($this->webhook); 
-        $message = unserialize($this->message); 
+        /** @var Webhook $webhook */
+        $webhook = unserialize($this->webhook);
+        /** @var Message $message */
+        $message = unserialize($this->message);
 
         $ch = curl_init($webhook->getURL());
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($message));
@@ -59,7 +61,11 @@ class DiscordWebhookSendTask extends AsyncTask {
 
     public function onCompletion(): void {
         $response = $this->getResult();
-        $server = Server::getInstance(); 
+        if (!is_array($response) || count($response) < 2 || !is_int($response[1])) {
+            return;
+        }
+
+        $server = Server::getInstance();
         if (!in_array($response[1], [200, 204])) {
             $server->getLogger()->error("[DiscordWebhookAPI] Got error ({$response[1]}): " . $response[0]);
         }
