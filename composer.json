@@ -12,9 +12,9 @@
         "friendsofphp/php-cs-fixer": "^3.94.2"  
     },
     "autoload": {
-        "classmap": [
-            "src/"
-        ]
+        "psr-4": {
+            "CortexPE\\DiscordWebhookAPI\\": "src/CortexPE/DiscordWebhookAPI/"
+        }
     },
     "config": {
         "platform": {
