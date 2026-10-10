@@ -1,135 +1,100 @@
-<h1>DiscordWebhookAPI<img src="https://raw.githubusercontent.com/CortexPE/DiscordWebhookAPI/master/dwapi.png" height="64" width="64" align="left"></img>&nbsp;<img src="https://poggit.pmmp.io/ci.shield/CortexPE/DiscordWebhookAPI/~"></img></h1>
-<br />
+# DiscordWebhookAPI
 
-**A better fork of [CortexPE's DiscordWebhookAPI](https://github.com/CortexPE/DiscordWebhookAPI/) virion.**
+DiscordWebhookAPI is a PocketMine-MP Virion for sending messages, embeds and link components to Discord webhooks from a plugin.
 
-A PocketMine-MP Virion to easily send messages via Discord Webhooks
+This repository is a ReinfyTeam-maintained fork of [CortexPE's DiscordWebhookAPI](https://github.com/CortexPE/DiscordWebhookAPI). The public namespace remains `CortexPE\DiscordWebhookAPI` for compatibility with existing consumers.
 
-# Usage:
-Installation is easy, you may get a compiled phar [here](https://poggit.pmmp.io/ci/CortexPE/DiscordWebhookAPI/~) or integrate the virion itself into your plugin.
+## Requirements
 
-This virion is purely object oriented. So, to use it you'll have to import the `Webhook` object, the `Message` object and the optional `Embed` object (if necessary)
+- PocketMine-MP API 5.
+- PHP 8.2 or newer.
+- PHP cURL extension enabled on the server and on the asynchronous worker runtime.
+- A Discord webhook URL with permission to post to the target channel.
 
-## Basic Usage:
-### Import the classes
-You'll need to import these classes in order to easily use it within our code.
+The library queues delivery through PocketMine-MP's asynchronous task pool. It does not provide a Discord bot client, interaction handler or delivery retry queue.
+
+## Installation
+
+Use the repository as a Virion dependency in the consumer plugin's build configuration. The consumer is responsible for packaging the library into its plugin PHAR and for providing the PocketMine-MP runtime.
+
+The repository's `virion.yml` contains the Antigen metadata and namespace root. Build and validate the consumer with the current pinned DevTools configuration; the user-facing documentation intentionally refers to DevTools by name rather than copying a CI tool version.
+
+This repository does not currently publish a maintained GitHub Release or a current GitHub Actions artifact. Do not use the historical Poggit link as evidence of a current build. Consumers should use their own verified build pipeline or a release explicitly published by ReinfyTeam.
+
+## Basic usage
+
 ```php
-<?php
-
 use CortexPE\DiscordWebhookAPI\Message;
 use CortexPE\DiscordWebhookAPI\Webhook;
-use CortexPE\DiscordWebhookAPI\Embed; // optional
+
+$webhook = new Webhook('https://discord.com/api/webhooks/...');
+$message = new Message();
+$message->setUsername('My plugin');
+$message->setContent('Hello from PocketMine-MP.');
+
+$webhook->send($message);
 ```
-### Construct a Discord `Webhook` object
-You'll need the Webhook's URL. For more information regarding how to create Discord webhooks on a Discord Text Channel, Please [click here](https://support.discordapp.com/hc/en-us/articles/228383668-Intro-to-Webhooks).
+
+`send()` schedules an asynchronous task and returns immediately. The task posts JSON to Discord and reports non-successful HTTP responses through the PocketMine-MP logger. A message must contain content or another Discord-supported payload component.
+
+## Embeds
+
 ```php
-$webHook = new Webhook("YOUR WEBHOOK URL");
-```
-### Construct a Discord `Message` object
-You'll need to create a new `Message` object for every message that you want to send... You can use different message objects for separate webhooks and this object **DOES NOT** depend on the `Webhook` object. It is stand-alone and it would work by itself.
-```php
-$msg = new Message();
-$msg->setUsername("USERNAME"); // optional
-$msg->setAvatarURL("https://cortexpe.xyz/utils/kitsu.png"); // optional
-$msg->setContent("INSERT TEXT HERE"); // optional. Maximum length is 2000 characters, the limit is set by discord, therefore it is not hardcoded within this API
-```
-### Sending the message
-You can easily send the message to the webhook now! :tada: This will schedule a new AsyncTask on the Server's AsyncPool to prevent blocking the Main Thread. Do take note however, that **you CANNOT send a blank message.** doing so will only produce an error received from Discord itself.
-```php
-$webHook->send($msg);
-```
-How easy was that? ^-^ Now for the much more advanced and cooler stuff, Embeds!
-### Embeds
-Before you send the message, you might want to add an embed. A message can have several embeds in it! You only have to construct an embed and use the `Message->addEmbed()` method to add it into the message object.
-```php
+use CortexPE\DiscordWebhookAPI\Embed;
+
 $embed = new Embed();
-```
-Now, the embed has to have something in it to function properly, so we'll add in a title (optional) and a description (optional). **All of the fields are optional, but it should contain ATLEAST one field or it would refuse to add it into the message**
-```php
-$embed->setTitle("Embed Title Here");
-$embed->setDescription("A very awesome description");
-```
-We can even set a footer text! The text on the bottom part of the embeds...
-```php
-$embed->setFooter("Erin is kawaii UwU");
-```
-Or even, add an icon to the footer...
-```php
-$embed->setFooter("Erin is kawaii UwU","https://cortexpe.xyz/utils/kitsu.png");
-```
-Now that the embed has been constructed and has a valid content, we will have to add it to the `Message` object... We'll need to use the `Message->addEmbed()` method for that.
-```php
-$msg->addEmbed($embed);
+$embed->setTitle('Build completed');
+$embed->setDescription('The plugin was packaged successfully.');
+$embed->setColor(0x2ECC71);
+
+$message->addEmbed($embed);
+$webhook->send($message);
 ```
 
-You can even enable specific mentions, using the following statement: `Message->getAllowedMentions()`. The only things you need are discord snowflakes/ids.
-Be aware, if you call `Message->getAllowedMentions()` you will get a new instance of the `AllowedMentions` class, which will allowing all mentions passing through.
+The library also supports authors, footers, thumbnails, images, fields, timestamps and text-to-speech flags through the corresponding `Embed` and `Message` methods.
+
+## Mentions
+
+Use `AllowedMentions` when a message must restrict or suppress Discord mentions:
+
 ```php
-$msg->getAllowedMentions()->addUser($userId1, $userId2); // Only the two users corresponding with these two ids will be mentioned
-$msg->getAllowedMentions()->addRole($roleId1, $roleId2); // Now also all the people with $roleId1 and $roleId2 will be mentioned
-```
-But if you want to suppress every mention out of that message you can use following method.
-```php
-$msg->getAllowedMentions()->suppressAll();
+$message->getAllowedMentions()->suppressAll();
+// Or allow only specific users and roles.
+$message->getAllowedMentions()->addUser('123456789012345678');
+$message->getAllowedMentions()->addRole('234567890123456789');
 ```
 
-### Components
-Message components—we'll call them "components" moving forward—are a framework for adding interactive elements to the messages. They're accessible, customizable, and easy to use.
-This components are currently W.I.P. which means it's under of development. If you have an issue about executing this code. You can create an issue or pull request for a feature request or subject/proposal to change.
-To find out about this components, checkout discord docs that can be [read here](https://discord.com/developers/docs/interactions/message-components).
+## Components
 
-To add Components, you must create an instance to class by using:
+`Component` currently supports link buttons. Component support is intentionally limited to the payloads implemented by this library; it is not a complete Discord interactions framework.
+
 ```php
+use CortexPE\DiscordWebhookAPI\Component;
+
 $component = new Component();
-```
-To add a button link text, just add this:
-```php
-$component->addButtonLink("Click me!", "https://cortexpe.xyz/");
-```
-Now add it to our message instance by using:
-```php
-$msg->addComponent($component);
+$component->addLinkButton('Open documentation', 'https://github.com/ReinfyTeam/DiscordWebhookAPI');
+$message->addComponent($component);
 ```
 
-**That's all for the Basic Usage of the API. To learn more, You can explore it by reading the API's source code yourself (the code is simple and explanatory) or by using your favorite IDE to index it yourself. :3**
-# Sample Code used to test this API earlier:
-```php
-// Construct a discord webhook with its URL
-$webHook = new Webhook("YOUR WEBHOOK URL");
+## Development checks
 
-// Construct a new Message object
-$msg = new Message();
+From the repository root:
 
-$msg->setUsername("USERNAME");
-$msg->setAvatarURL("https://cortexpe.xyz/utils/kitsu.png");
-$msg->setContent("INSERT TEXT HERE");
-$msg->suppressAll();
-
-// Create an embed object with #FF0000 (RED) as the embed's color and "EMBED 1" as the title
-$embed = new Embed();
-$embed->setTitle("EMBED 1");
-$embed->setColor(0xFF0000);
-$msg->addEmbed($embed);
-
-$embed = new Embed();
-$embed->setTitle("EMBED 2");
-$embed->setColor(0x00FF00);
-$embed->setAuthor("AUTHOR", "https://CortexPE.xyz", "https://cortexpe.xyz/utils/kitsu.png");
-$embed->setDescription("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
-$msg->addEmbed($embed);
-
-$embed = new Embed();
-$embed->setTitle("EMBED 3");
-$embed->setColor(0x0000FF);
-$embed->addField("FIELD ONE", "Some text here");
-$embed->addField("FIELD TWO", "Some text here", true);
-$embed->addField("FIELD THREE", "Some text here", true);
-$embed->setThumbnail("https://cortexpe.xyz/utils/kitsu.png");
-$embed->setImage("https://cortexpe.xyz/utils/kitsu.png");
-$embed->setFooter("Erin is kawaii UwU","https://cortexpe.xyz/utils/kitsu.png");
-$msg->addEmbed($embed);
-
-$webHook->send($msg);
+```text
+composer validate --strict
+composer install --no-interaction --no-progress
+composer run format:check
+composer run analyze
 ```
------
-**This API was made with :heart: by CortexPE, Enjoy!~ :3**
+
+The build workflow belongs to the consumer plugin because this repository is a Virion library. Keep dependency pins and build-tool revisions in machine-readable project configuration so documentation does not become stale whenever the toolchain is updated.
+
+## Attribution and license
+
+This project preserves the original CortexPE implementation, attribution and public namespace. It also retains the original SynicadeNetwork notice in source headers where present.
+
+DiscordWebhookAPI is available under the [GNU Lesser General Public License v3.0 or later](LICENSE). Contributions must preserve the upstream copyright notices, license obligations and compatibility expectations of existing consumers.
+
+## Support
+
+For a bug in the library, open an issue in [ReinfyTeam/DiscordWebhookAPI](https://github.com/ReinfyTeam/DiscordWebhookAPI). For Discord API behavior, webhook permissions or Discord service failures, consult the [Discord webhook documentation](https://discord.com/developers/docs/resources/webhook) and provide the HTTP status observed by the consumer.

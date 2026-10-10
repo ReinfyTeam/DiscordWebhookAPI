@@ -24,64 +24,75 @@
  * Intended for use on SynicadeNetwork <https://synicade.com>
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace CortexPE\DiscordWebhookAPI;
 
+class Message implements \JsonSerializable
+{
+    /** @var array{content?: string, username?: string, avatar_url?: string, embeds?: list<array<string, mixed>>, components?: list<array<string, mixed>>, tts?: bool, allowed_mentions?: AllowedMentions} */
+    protected $data = [];
 
-class Message implements \JsonSerializable {
-	/** @var array{content?: string, username?: string, avatar_url?: string, embeds?: list<array<string, mixed>>, components?: list<array<string, mixed>>, tts?: bool, allowed_mentions?: AllowedMentions} */
-	protected $data = [];
+    public function setContent(string $content): void
+    {
+        $this->data["content"] = $content;
+    }
 
-	public function setContent(string $content): void{
-		$this->data["content"] = $content;
-	}
+    public function getContent(): ?string
+    {
+        return $this->data["content"] ?? null;
+    }
 
-	public function getContent(): ?string{
-		return $this->data["content"] ?? null;
-	}
+    public function getUsername(): ?string
+    {
+        return $this->data["username"] ?? null;
+    }
 
-	public function getUsername(): ?string{
-		return $this->data["username"] ?? null;
-	}
+    public function setUsername(string $username): void
+    {
+        $this->data["username"] = $username;
+    }
 
-	public function setUsername(string $username): void{
-		$this->data["username"] = $username;
-	}
+    public function getAvatarURL(): ?string
+    {
+        return $this->data["avatar_url"] ?? null;
+    }
 
-	public function getAvatarURL(): ?string{
-		return $this->data["avatar_url"] ?? null;
-	}
+    public function setAvatarURL(string $avatarURL): void
+    {
+        $this->data["avatar_url"] = $avatarURL;
+    }
 
-	public function setAvatarURL(string $avatarURL): void{
-		$this->data["avatar_url"] = $avatarURL;
-	}
+    public function addEmbed(Embed $embed): void
+    {
+        if (!empty(($arr = $embed->asArray()))) {
+            $this->data["embeds"][] = $arr;
+        }
+    }
 
-	public function addEmbed(Embed $embed):void{
-		if(!empty(($arr = $embed->asArray()))){
-			$this->data["embeds"][] = $arr;
-		}
-	}
+    public function addComponent(Component $component): void
+    {
+        if (!empty(($arr = $component->asArray()))) {
+            $this->data["components"][] = $arr;
+        }
+    }
 
-    public function addComponent(Component $component):void{
-		if(!empty(($arr = $component->asArray()))){
-			$this->data["components"][] = $arr;
-		}
-	}
+    public function setTextToSpeech(bool $ttsEnabled): void
+    {
+        $this->data["tts"] = $ttsEnabled;
+    }
 
-	public function setTextToSpeech(bool $ttsEnabled):void{
-		$this->data["tts"] = $ttsEnabled;
-	}
+    public function getAllowedMentions(): AllowedMentions
+    {
+        if (array_key_exists("allowed_mentions", $this->data)) {
+            return $this->data["allowed_mentions"];
+        }
 
-	public function getAllowedMentions(): AllowedMentions {
-		if (array_key_exists("allowed_mentions", $this->data)) {
-			return $this->data["allowed_mentions"];
-		}
+        return $this->data["allowed_mentions"] = new AllowedMentions();
+    }
 
-		return $this->data["allowed_mentions"] = new AllowedMentions();
-	}
-
-	public function jsonSerialize() : mixed{
-		return $this->data;
-	}
+    public function jsonSerialize(): mixed
+    {
+        return $this->data;
+    }
 }

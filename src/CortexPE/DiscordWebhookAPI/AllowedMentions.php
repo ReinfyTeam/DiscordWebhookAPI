@@ -24,100 +24,109 @@
  * Intended for use on SynicadeNetwork <https://synicade.com>
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace CortexPE\DiscordWebhookAPI;
 
 use function count;
 use function in_array;
 
-class AllowedMentions implements \JsonSerializable {
-	/** @var bool */
-	private $parseUsers = true, $parseRoles = true, $mentionEveryone = true, $suppressAll = false;
+class AllowedMentions implements \JsonSerializable
+{
+    private bool $parseUsers = true;
+    private bool $parseRoles = true;
+    private bool $mentionEveryone = true;
+    private bool $suppressAll = false;
 
-	/** @var list<string> */
-	private $roles = [];
+    /** @var list<string> */
+    private $roles = [];
 
-	/** @var list<string> */
-	private $users = [];
+    /** @var list<string> */
+    private $users = [];
 
-	/**
-	 * If following role is given into the messages content, every user of it will be mentioned
-	 * @param string ...$roleID
-	 */
-	public function addRole(string ...$roleID): void {
-		foreach ($roleID as $item) {
-			if (in_array($item, $this->roles, true)) {
-				continue;
-			}
+    /**
+     * If following role is given into the messages content, every user of it will be mentioned
+     * @param string ...$roleID
+     */
+    public function addRole(string ...$roleID): void
+    {
+        foreach ($roleID as $item) {
+            if (in_array($item, $this->roles, true)) {
+                continue;
+            }
 
-			$this->roles[] = $item;
-		}
-		$this->parseRoles = false;
-	}
+            $this->roles[] = $item;
+        }
+        $this->parseRoles = false;
+    }
 
-	/**
-	 * If following user is given into the messages content, the user will be mentioned
-	 * @param string ...$userID
-	 */
-	public function addUser(string ...$userID): void {
-		foreach ($userID as $item) {
-			if (in_array($item, $this->users, true)) {
-				continue;
-			}
+    /**
+     * If following user is given into the messages content, the user will be mentioned
+     * @param string ...$userID
+     */
+    public function addUser(string ...$userID): void
+    {
+        foreach ($userID as $item) {
+            if (in_array($item, $this->users, true)) {
+                continue;
+            }
 
-			$this->users[] = $item;
-		}
+            $this->users[] = $item;
+        }
 
-		$this->parseUsers = false;
-	}
+        $this->parseUsers = false;
+    }
 
-	/**
-	 * If the message content has whether everyone or here and $mention is set to false, the users won't be mentioned
-	 * @param bool $mention
-	 */
-	public function mentionEveryone(bool $mention): void {
-		$this->mentionEveryone = $mention;
-	}
+    /**
+     * If the message content has whether everyone or here and $mention is set to false, the users won't be mentioned
+     * @param bool $mention
+     */
+    public function mentionEveryone(bool $mention): void
+    {
+        $this->mentionEveryone = $mention;
+    }
 
-	/**
-	 * If this function is called no mention will be getting showed for anyone
-	 */
-	public function suppressAll(): void {
-		$this->suppressAll = true;
-	}
+    /**
+     * If this function is called no mention will be getting showed for anyone
+     */
+    public function suppressAll(): void
+    {
+        $this->suppressAll = true;
+    }
 
-	/** @return array<string, mixed> */
-	public function jsonSerialize(): array {
-		if ($this->suppressAll) {
-			return [
-				"parse" => []
-			];
-		}
+    /** @return array<string, mixed> */
+    public function jsonSerialize(): array
+    {
+        if ($this->suppressAll) {
+            return [
+                "parse" => []
+            ];
+        }
 
-		$data = ["parse" => []];
-		if ($this->mentionEveryone) {
-			$data["parse"][] = "everyone";
-		}
+        $data = ["parse" => []];
+        if ($this->mentionEveryone) {
+            $data["parse"][] = "everyone";
+        }
 
-		if (count($this->users) !== 0) {
-			$data["users"] = $this->users;
-		} else if ($this->parseUsers) {
-			$data["parse"][] = "users";
-		}
+        if (count($this->users) !== 0) {
+            $data["users"] = $this->users;
+        } elseif ($this->parseUsers) {
+            $data["parse"][] = "users";
+        }
 
-		if (count($this->roles) !== 0) {
-			$data["roles"] = $this->roles;
-		} else if ($this->parseRoles) {
-			$data["parse"][] = "roles";
-		}
+        if (count($this->roles) !== 0) {
+            $data["roles"] = $this->roles;
+        } elseif ($this->parseRoles) {
+            $data["parse"][] = "roles";
+        }
 
-		return $data;
-	}
+        return $data;
+    }
 
-	/** @return array<string, mixed> */
-	public function asArray(): array{
-		// Why doesn't PHP have a `__toArray()` magic method??? This would've been better.
-		return $this->jsonSerialize();
-	}
+    /** @return array<string, mixed> */
+    public function asArray(): array
+    {
+        // Why doesn't PHP have a `__toArray()` magic method??? This would've been better.
+        return $this->jsonSerialize();
+    }
 }

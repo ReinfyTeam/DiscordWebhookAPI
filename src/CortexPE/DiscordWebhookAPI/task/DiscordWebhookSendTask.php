@@ -24,7 +24,7 @@
  * Intended for use on SynicadeNetwork <https://synicade.com>
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace CortexPE\DiscordWebhookAPI\task;
 
@@ -33,16 +33,19 @@ use CortexPE\DiscordWebhookAPI\Webhook;
 use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
 
-class DiscordWebhookSendTask extends AsyncTask {
+class DiscordWebhookSendTask extends AsyncTask
+{
     protected string $webhook;
     protected string $message;
 
-    public function __construct(Webhook $webhook, Message $message){
+    public function __construct(Webhook $webhook, Message $message)
+    {
         $this->webhook = serialize($webhook);
         $this->message = serialize($message);
     }
 
-    public function onRun(): void {
+    public function onRun(): void
+    {
         /** @var Webhook $webhook */
         $webhook = unserialize($this->webhook);
         /** @var Message $message */
@@ -52,14 +55,15 @@ class DiscordWebhookSendTask extends AsyncTask {
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($message, JSON_THROW_ON_ERROR));
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, ["Content-Type: application/json"]);
         $this->setResult([curl_exec($ch), curl_getinfo($ch, CURLINFO_RESPONSE_CODE)]);
         curl_close($ch);
     }
 
-    public function onCompletion(): void {
+    public function onCompletion(): void
+    {
         $response = $this->getResult();
         if (!is_array($response) || count($response) < 2 || !is_int($response[1])) {
             return;
