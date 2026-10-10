@@ -19,7 +19,7 @@ Use the repository as a Virion dependency in the consumer plugin's build configu
 
 The repository's `virion.yml` contains the Antigen metadata and namespace root. Build and validate the consumer with the current pinned DevTools configuration; the user-facing documentation intentionally refers to DevTools by name rather than copying a CI tool version.
 
-This repository does not currently publish a maintained GitHub Release or a current GitHub Actions artifact. Do not use the historical Poggit link as evidence of a current build. Consumers should use their own verified build pipeline or a release explicitly published by ReinfyTeam.
+The current source release is [2.0.0](https://github.com/ReinfyTeam/DiscordWebhookAPI/releases/tag/2.0.0). The release contains the library source and metadata; consumers remain responsible for bundling and validating the resulting plugin PHAR through their own Virion-compatible build pipeline. Do not use the historical Poggit link as evidence of a current build.
 
 ## Basic usage
 
